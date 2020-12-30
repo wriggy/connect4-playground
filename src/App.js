@@ -1,15 +1,12 @@
 //import logo from './logo.svg';
 import './App.css';
-import Comp1 from './components/Comp1/Comp1'
+import Game from './components/Game'
 
 function App() {
   return (
     <div className="App">
-        <Comp1 />
+        <Game />
       <footer className="App-footer">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
         <a
           className="App-link"
           href="https://reactjs.org"

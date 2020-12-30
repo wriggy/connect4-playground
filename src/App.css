@@ -5,7 +5,7 @@
 
 .App-footer {
   background-color: #282c34;
-  min-height: 30vh;
+  min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,4 +16,48 @@
 
 .App-link {
   color: #61dafb;
+}
+
+
+hr {
+  color: #61dafb;
+}
+
+.board {
+  
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.game {
+  margin: 40px 40px;
+  padding: 40px 40px;
+  background-color:azure;
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left:40px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 38px;
+  height: 38px;
+  padding: 0;
+  text-align: center;
+  width: 38px;
+}
+
+.square:focus {
+  outline: none;
 }
