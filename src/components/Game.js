@@ -108,7 +108,10 @@ function Game() {
         })
         if (okMoves.length > 0) { 
             //console.log("Not giving a winning move to opponent")
-            return okMoves[Math.floor(Math.random() * okMoves.length)]}
+            let lowestRow = Math.max(...okMoves.map(n=> gridRow(n)))
+            let bestMoves = okMoves.filter(n => gridRow(n) === lowestRow)
+            return bestMoves[Math.floor(Math.random() * bestMoves.length)]
+        }
 
         if (validMoves.length > 0) {
             return (validMoves[Math.floor(Math.random() * validMoves.length)])
