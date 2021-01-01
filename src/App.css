@@ -76,3 +76,7 @@ hr {
 .square:focus {
   outline: none;
 }
+
+.winning {
+  color: red;
+}

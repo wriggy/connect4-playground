@@ -1,8 +1,9 @@
-function Square({counter, onClick}) {
+function Square({counter, onClick, css}) {
+    let cssClass = "square " + css
 
     return (
-        <div className="square">
-            <button className="square" onClick={() => onClick()}>   
+        <div className={cssClass}>
+            <button className={cssClass} onClick={() => onClick()}>  
                 {counter}    
             </button>
         </div>
