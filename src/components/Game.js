@@ -72,12 +72,16 @@ function Game() {
         let winningMoves = validMoves.filter(ix =>
             (isWinningMove(gridRow(ix), gridCol(ix), "O", sqs))
         )
-        if (winningMoves.length > 0) { return winningMoves[0] }
+        if (winningMoves.length > 0) { 
+            //console.log("winning move")
+            return winningMoves[0] }
 
         let opponentWinningMoves = validMoves.filter(ix =>
             (isWinningMove(gridRow(ix), gridCol(ix), "X", sqs))
         )
-        if (opponentWinningMoves.length > 0) { return opponentWinningMoves[0] }
+        if (opponentWinningMoves.length > 0) { 
+            //console.log("blocking move")
+            return opponentWinningMoves[0] }
 
         let goodMoves = validMoves.filter(ix => {
             let possSqs = sqs.slice(); possSqs[ix] = "O";
@@ -89,7 +93,9 @@ function Game() {
             if (winningMoves.length > 0) { return true }
             return false
         })
-        if (goodMoves.length > 0) { return goodMoves[0] }
+        if (goodMoves.length > 0) { 
+            //console.log("possible winning move next time")
+            return goodMoves[0] }
 
         let okMoves = validMoves.filter(ix => {
             let possSqs = sqs.slice(); possSqs[ix] = "O";
@@ -100,7 +106,9 @@ function Game() {
             if (opponentWinningMoves.length > 0) { return false }
             return true
         })
-        if (okMoves.length > 0) { return okMoves[0] }
+        if (okMoves.length > 0) { 
+            //console.log("Not giving a winning move to opponent")
+            return okMoves[Math.floor(Math.random() * okMoves.length)]}
 
         if (validMoves.length > 0) {
             return (validMoves[Math.floor(Math.random() * validMoves.length)])
