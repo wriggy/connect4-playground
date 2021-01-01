@@ -4,45 +4,29 @@ import Board from './Board'
 function Game() {
 
     const config = { rows: [0, 1, 2, 3, 4, 5], cols: [0, 1, 2, 3, 4, 5, 6], numConnections: 4 }
-
     const initDat = Array(config.rows.length * config.cols.length).fill(null)
-    let testdat = [null, null, null, null, null, null, null,
-        null, null, null, null, null, null, null,
-        null, null, null, null, null, null, null,
-        null, null, null, null, null, null, null,
-        null, null, null, null, null, null, null,
-        null, null, 'X', 'O', null, null, null
-    ]
+    
     // state
-    const [squares, setSquares] = useState(testdat)
-    const [xIsNext, setXIsNext] = useState(true)
+    const [squares, setSquares] = useState(initDat)
     const [done, setDone] = useState(false)
 
-    const isValid = n => {
-        if (squares[n]) { return false }
+    // helper fns
+    const isValid = (n,sqs) => {
+        if (sqs[n]) { return false }
         if ((n < config.cols.length * (config.rows.length - 1)) &&
-            !(squares[n + config.cols.length])) { return false }
+            !(sqs[n + config.cols.length])) { return false }
         return true
     }
 
-    const grid = sqs => {
-        let arr = sqs.slice()
-        let grid = []
-        while (arr.length) { grid.push(arr.splice(0, config.cols.length)) }
-        return grid
-    }
-
-    // helper fns
     const gridCol = n => n % config.cols.length;
     const gridRow = n => Math.floor(n / config.cols.length);
     const gridIx = (r, c) => c + r * config.cols.length;
 
-    const isWinningMove = (row, col, player) => {
-        console.log("checking .. ", row, col, player)
+    const isWinningMove = (row, col, player, sqs) => {
         const isClaimed = (r, c) => {
             if (r < 0 || r >= config.rows.length) return false
             if (c < 0 || c >= config.cols.length) return false
-            return (squares[gridIx(r, c)] === player)
+            return (sqs[gridIx(r, c)] === player)
         };
 
         const checkDirection = (dr, dc) => {
@@ -55,7 +39,6 @@ function Game() {
             while (isClaimed(R, C)) {
                 count += 1; R -= dr; C -= dc
             }
-            console.log(dr,dc,count)
             return (count >= config.numConnections)
         }
 
@@ -66,34 +49,51 @@ function Game() {
         return false
     }
 
+    const choose = (sqs) => {
+        let validMoves = sqs.map((val, ix) => ix).filter(ix => isValid(ix, sqs)) ;
+        if (validMoves.length >0) {return (validMoves[Math.floor(Math.random() * validMoves.length)]) }
+        return false
+    }
+
     const handleClick = n => {
-        if (done || !isValid(n)) { return }
         let sqs = squares.slice();
-        sqs[n] = xIsNext ? "X" : "O";
-        setSquares(sqs);
-        if (isWinningMove(gridRow(n), gridCol(n), sqs[n])) {
+        if (done || !isValid(n, sqs)) { return }
+        sqs[n] = "X";
+        setSquares(sqs)
+        if (isWinningMove(gridRow(n), gridCol(n), "X", sqs)) {
             setDone(true)
+            return
         }
-        setXIsNext(!xIsNext)
+        let nextMove = choose(sqs);
+        if (nextMove) {
+            sqs[nextMove] = "O";
+            setSquares(sqs)
+            if (isWinningMove(gridRow(nextMove), gridCol(nextMove),"O", sqs)) {
+                setDone(true)
+            }
+        } 
     }
 
     const reset = () => {
         setSquares(initDat)
-        setXIsNext(true)
         setDone(false)
     }
 
+
     return (
         <div className="game">
-            <p>Connect 4</p>
+            <p>Connect 4<br />Play first against the computer</p>
             <div className="game-info">
                 <button className="reset" onClick={() => reset()}> New Game </button><br /><br />
-                <h2>{done ? "Game Over" : "Next Player : " + (xIsNext ? "X" : "O")}</h2>
+                <h3>{done ? "Game Over" : "Computer is O"}</h3>
             </div>
             <Board
                 config={config}
                 squares={squares}
-                onClick={(i) => handleClick(i)} />
+                onClick={(i) => {
+                    handleClick(i)
+                    }
+                } />
         </div>
     );
 }
