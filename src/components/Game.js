@@ -3,7 +3,7 @@ import Board from './Board'
 
 function Game() {
 
-    const config = { rows: [0, 1, 2, 3, 4, 5], cols: [0, 1, 2, 3, 4, 5, 6], numconnections: 4 }
+    const config = { rows: [0, 1, 2, 3, 4, 5], cols: [0, 1, 2, 3, 4, 5, 6], numConnections: 4 }
 
     const initDat = Array(config.rows.length * config.cols.length).fill(null)
     let testdat = [null, null, null, null, null, null, null,
@@ -17,12 +17,11 @@ function Game() {
     const [squares, setSquares] = useState(testdat)
     const [xIsNext, setXIsNext] = useState(true)
     const [done, setDone] = useState(false)
-    
+
     const isValid = n => {
         if (squares[n]) { return false }
         if ((n < config.cols.length * (config.rows.length - 1)) &&
             !(squares[n + config.cols.length])) { return false }
-        console.log(n)
         return true
     }
 
@@ -33,26 +32,37 @@ function Game() {
         return grid
     }
 
-    const gridCol = n => n%config.cols.length;
-    const gridRow = n => Math.floor(n/config.cols.length);
+    // helper fns
+    const gridCol = n => n % config.cols.length;
+    const gridRow = n => Math.floor(n / config.cols.length);
+    const gridIx = (r, c) => c + r * config.cols.length;
 
-    const isClaimed = (n, player) => {
-        console.log(n, player)
-        if ((n < 0) || (n >= config.rows.length * config.cols.length)) { return false }
-        return squares[n] === player
-    }
+    const isWinningMove = (row, col, player) => {
+        console.log("checking .. ", row, col, player)
+        const isClaimed = (r, c) => {
+            if (r < 0 || r >= config.rows.length) return false
+            if (c < 0 || c >= config.cols.length) return false
+            return (squares[gridIx(r, c)] === player)
+        };
 
-    const isWinningMove = (n, player) => {
-        let count = 1; 
-        let i = n + config.cols.length;
-        while (isClaimed(i, player)) {
-            count++; i = i + config.cols.length;
+        const checkDirection = (dr, dc) => {
+            let count = 1
+            let R = row + dr; let C = col + dc
+            while (isClaimed(R, C)) {
+                count += 1; R += dr; C += dc
+            }
+            R = row -dr; C = col -dc
+            while (isClaimed(R, C)) {
+                count += 1; R -= dr; C -= dc
+            }
+            console.log(dr,dc,count)
+            return (count >= config.numConnections)
         }
-        i = n - config.cols.length;
-        while (isClaimed(i, "X")) {
-            count++; i = i - config.cols.length;
-        }
-        if (count >= 4) { return true }
+
+        if (checkDirection(0, 1)) {return true}
+        if (checkDirection(1, 0)) {return true}
+        if (checkDirection(1, 1)) {return true}
+        if (checkDirection(1, -1)) {return true}
         return false
     }
 
@@ -61,7 +71,7 @@ function Game() {
         let sqs = squares.slice();
         sqs[n] = xIsNext ? "X" : "O";
         setSquares(sqs);
-        if (isWinningMove(n,sqs[n])) {
+        if (isWinningMove(gridRow(n), gridCol(n), sqs[n])) {
             setDone(true)
         }
         setXIsNext(!xIsNext)
@@ -77,7 +87,7 @@ function Game() {
         <div className="game">
             <p>Connect 4</p>
             <div className="game-info">
-                <button className="reset" onClick={() => reset()}> New Game </button><br /><br />  
+                <button className="reset" onClick={() => reset()}> New Game </button><br /><br />
                 <h2>{done ? "Game Over" : "Next Player : " + (xIsNext ? "X" : "O")}</h2>
             </div>
             <Board
