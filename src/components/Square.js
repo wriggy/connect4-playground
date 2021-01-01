@@ -1,10 +1,8 @@
 function Square({counter, onClick}) {
 
-    const sqrClick= () => onClick()
-
     return (
         <div className="square">
-            <button className="square" onClick={sqrClick}>   
+            <button className="square" onClick={() => onClick()}>   
                 {counter}    
             </button>
         </div>

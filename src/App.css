@@ -18,13 +18,18 @@
   color: #61dafb;
 }
 
+h1, h2, h3 {
+  padding: 0;
+  margin: 0;
+}
 
 hr {
   color: #61dafb;
 }
 
 .board {
-  
+  min-width: 280px;
+  padding-top: 20px;
 }
 
 .board-row:after {
@@ -34,15 +39,25 @@ hr {
 }
 
 .game {
-  margin: 40px 40px;
-  padding: 40px 40px;
+  margin: 20px;
+  padding: 20px 20px;
   background-color:azure;
-  display: flex;
-  flex-direction: row;
+  width: 280px;
 }
 
 .game-info {
-  margin-left:40px;
+}
+
+.reset {
+  background-color: rgb(3, 66, 148); 
+  border: none;
+  border-radius: 1rem;
+  color: white;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
 }
 
 .square {
