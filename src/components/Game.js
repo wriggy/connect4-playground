@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Board from './Board'
+import choose from './Player'
 
 function Game() {
-
     const config = { rows: [0, 1, 2, 3, 4, 5], cols: [0, 1, 2, 3, 4, 5, 6], numConnections: 4 }
     const initDat = Array(config.rows.length * config.cols.length).fill(null)
 
@@ -11,27 +11,19 @@ function Game() {
     const [done, setDone] = useState(false)
     const [winningIxes, setWinningIxes] = useState([])
 
-    // helper fns
-    const isValid = (n, sqs) => {
-        if (sqs[n]) { return false }
-        if ((n < config.cols.length * (config.rows.length - 1)) &&
-            !(sqs[n + config.cols.length])) { return false }
-        return true
-    }
-
-    const gridCol = n => n % config.cols.length;
-    const gridRow = n => Math.floor(n / config.cols.length);
-    const gridIx = (r, c) => c + r * config.cols.length;
-
-    const isClaimed = (r, c, player, sqs) => {
-        if (r < 0 || r >= config.rows.length) return false
-        if (c < 0 || c >= config.cols.length) return false
-        return (sqs[gridIx(r, c)] === player)
-    };
-
-    const winningLine = (row, col, player, sqs) => {
+    // functions
+    const isWinningMove = (n, player, sqs) => {
+        // return false or indexes of line if a win
+        const row = Math.floor(n / config.cols.length); 
+        const col = n % config.cols.length;
+        const gridIx = (r, c) => c + r * config.cols.length;
+        const isClaimed = (r, c) => {
+            if (r < 0 || r >= config.rows.length) return false
+            if (c < 0 || c >= config.cols.length) return false
+            return (sqs[gridIx(r, c)] === player)
+        };
         const checkDir = (dr,dc) => {
-            let count = 1; let gridIxes=[gridIx(row,col)];
+            let count = 1; let gridIxes=[n];
             let R = row + dr; let C = col + dc
             while (isClaimed(R, C, player, sqs)) { 
                 count += 1; gridIxes.push(gridIx(R,C))
@@ -40,114 +32,45 @@ function Game() {
             while (isClaimed(R, C, player, sqs)) { 
                 count += 1;  gridIxes.push(gridIx(R,C))
                 R -= dr; C -= dc }
-            return ([(count >= config.numConnections), gridIxes])
+            return ((count >= config.numConnections) ? gridIxes : false)
         }
-        if (checkDir(0,1)[0]) {return checkDir(0,1)[1]}
-        if (checkDir(1,0)[0]) {return checkDir(1,0)[1]}
-        if (checkDir(1,1)[0]) {return checkDir(1,1)[1]}
-        if (checkDir(1,-1)[0]) {return checkDir(1,-1)[1]}
-    }
-
-    const checkDirection = (dr, dc, row, col, player, sqs) => {
-        let count = 1; let R = row + dr; let C = col + dc
-        while (isClaimed(R, C, player, sqs)) { 
-            count += 1; R += dr; C += dc }
-        R = row - dr; C = col - dc
-        while (isClaimed(R, C, player, sqs)) { 
-            count += 1; R -= dr; C -= dc }
-        return ((count >= config.numConnections))
-    }
-
-    const isWinningMove = (row, col, player, sqs) => {
-        if (checkDirection(0, 1, row, col, player, sqs)) { return true }
-        if (checkDirection(1, 0, row, col, player, sqs)) { return true }
-        if (checkDirection(1, 1, row, col, player, sqs)) { return true }
-        if (checkDirection(1, -1, row, col, player, sqs)) { return true }
+        if (checkDir(0,1)) {return checkDir(0,1)}
+        if (checkDir(1,0)) {return checkDir(1,0)}
+        if (checkDir(1,1)) {return checkDir(1,1)}
+        if (checkDir(1,-1)) {return checkDir(1,-1)}
         return false
     }
-
-    // basic player looking one or two moves ahead
-    const choose = sqs => {
-        let validMoves = sqs.map((val, ix) => ix).filter(ix => isValid(ix, sqs));
-        let winningMoves = validMoves.filter(ix =>
-            (isWinningMove(gridRow(ix), gridCol(ix), "O", sqs))
-        )
-        if (winningMoves.length > 0) { 
-            //console.log("winning move")
-            return winningMoves[0] }
-
-        let opponentWinningMoves = validMoves.filter(ix =>
-            (isWinningMove(gridRow(ix), gridCol(ix), "X", sqs))
-        )
-        if (opponentWinningMoves.length > 0) { 
-            //console.log("blocking move")
-            return opponentWinningMoves[0] }
-
-        let goodMoves = validMoves.filter(ix => {
-            let possSqs = sqs.slice(); possSqs[ix] = "O";
-            let possValidMoves = possSqs.map((val, i) => i).filter(i => isValid(i, possSqs));
-            winningMoves = possValidMoves.filter(i =>
-                (isWinningMove(gridRow(i), gridCol(i), "O", possSqs)) &&
-                !(isWinningMove(gridRow(i), gridCol(i), "X", possSqs))
-            )
-            if (winningMoves.length > 0) { return true }
-            return false
-        })
-        if (goodMoves.length > 0) { 
-            //console.log("possible winning move next time")
-            return goodMoves[0] }
-
-        let okMoves = validMoves.filter(ix => {
-            let possSqs = sqs.slice(); possSqs[ix] = "O";
-            let possValidMoves = possSqs.map((val, i) => i).filter(i => isValid(i, possSqs));
-            opponentWinningMoves = possValidMoves.filter(i =>
-                (isWinningMove(gridRow(i), gridCol(i), "X", possSqs))
-            )
-            if (opponentWinningMoves.length > 0) { return false }
-            return true
-        })
-        if (okMoves.length > 0) { 
-            //console.log("Not giving a winning move to opponent")
-            let lowestRow = Math.max(...okMoves.map(n=> gridRow(n)))
-            let bestMoves = okMoves.filter(n => gridRow(n) === lowestRow)
-            return bestMoves[Math.floor(Math.random() * bestMoves.length)]
-        }
-
-        if (validMoves.length > 0) {
-            return (validMoves[Math.floor(Math.random() * validMoves.length)])
-        }
-        return false
-    }
-
 
     const handleClick = n => {
+        if (done) { return }
         let sqs = squares.slice();
-        if (done || !isValid(n, sqs)) { return }
+        let nextMove = null
         sqs[n] = "X";
         setSquares(sqs)
-        if (isWinningMove(gridRow(n), gridCol(n), "X", sqs)) {
-            setWinningIxes(winningLine(gridRow(n), gridCol(n), "X", sqs))
+        if (isWinningMove(n, "X", sqs)) {
+            setWinningIxes(isWinningMove(n, "X", sqs))
             setDone(true)
             return
         }
-        let nextMove = choose(sqs);
+        nextMove = choose(config, sqs);
         if (nextMove) {
             sqs[nextMove] = "O";
             setSquares(sqs)
-            if (isWinningMove(gridRow(nextMove), gridCol(nextMove), "O", sqs)) {
-                setWinningIxes(winningLine(gridRow(nextMove), gridCol(nextMove), "O", sqs))
+            if (isWinningMove(nextMove, "O", sqs)) {
+                setWinningIxes(isWinningMove(nextMove, "O", sqs))
                 setDone(true)
                 return
             }
         }
     }
-
+    
     const reset = () => {
         setSquares(initDat)
         setDone(false)
         setWinningIxes([])
     }
 
+    // jsx
     return (
         <div className="game">
             <p>Connect 4<br />Play first against the computer</p>
