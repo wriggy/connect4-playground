@@ -12,6 +12,13 @@ function Game() {
     const [winningIxes, setWinningIxes] = useState([])
 
     // functions
+    const isValid = (n, sqs) => {
+        if (sqs[n]) { return false }
+        if ((n < config.cols.length * (config.rows.length - 1)) &&
+            !(sqs[n + config.cols.length])) { return false }
+        return true
+    }
+
     const isWinningMove = (n, player, sqs) => {
         // return false or indexes of line if a win
         const row = Math.floor(n / config.cols.length); 
@@ -42,8 +49,8 @@ function Game() {
     }
 
     const handleClick = n => {
-        if (done) { return }
         let sqs = squares.slice();
+        if (done || !isValid(n,sqs)) { return }
         let nextMove = null
         sqs[n] = "X";
         setSquares(sqs)
