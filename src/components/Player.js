@@ -1,5 +1,5 @@
 function choose(config, sqs) {
-    // choose next move - part random, part looking ahead a move or so//
+    // choose next move - part random, part looking ahead a move or so //
     const arrIxes = Array.from(Array(42).keys());
 
     // helper functions
@@ -62,6 +62,9 @@ function choose(config, sqs) {
         if (checkDirection(0, 1)) { return true }
         if (checkDirection(1, 1)) { return true }
         if (checkDirection(1, -1)) { return true }
+        if (checkDirection(0, -1)) { return true }
+        if (checkDirection(-1, -1)) { return true }
+        if (checkDirection(-1, 1)) { return true }
         return false
 
     }
@@ -96,10 +99,9 @@ function choose(config, sqs) {
             let newSqs = sqs.slice();
             newSqs[ix] = "O";
             let newValidMoves = arrIxes.filter(i => isValid(i, newSqs));
-            let winningMoves = newValidMoves.filter(i =>
-                (isWinningMove(i, "O", newSqs)) && !(isWinningMove(i, "X", newSqs))
-            )
-            if (winningMoves.length > 0) { return true }
+            let winningMoves = newValidMoves.filter(i => (isWinningMove(i, "O", newSqs)))
+            let losingMoves = newValidMoves.filter(i => (isWinningMove(i, "X", newSqs)))
+            if ((winningMoves.length > 0) && (losingMoves.length === 0)) { return true }
             return false
         })
         if (goodMoves.length > 0) {
@@ -107,23 +109,22 @@ function choose(config, sqs) {
             return goodMoves[Math.floor(Math.random() * goodMoves.length)]
         }
     }
-    // avoid moves which might lead to opponent win next time
-    let okMoves = validMoves.filter(ix => {
-        let newSqs = sqs.slice();
-        newSqs[ix] = "O";
-        let newValidMoves = arrIxes.filter(i => isValid(i, newSqs));
-        let opponentWinningMoves = newValidMoves.filter(i =>
-            (isWinningMove(i, "X", newSqs))
-        )
-        if (opponentWinningMoves.length > 0) { return false }
-        return true
-    })
-    if (okMoves.length > 0) {
-        //console.log("avoid any opponent win next time, random choice with central tendency")
-        let rand = (Math.random() + Math.random()) * okMoves.length / 2
-        return (okMoves[Math.floor(rand)])
+    {
+        // avoid moves which might lead to opponent win next time
+        let okMoves = validMoves.filter(ix => {
+            let newSqs = sqs.slice();
+            newSqs[ix] = "O";
+            let newValidMoves = arrIxes.filter(i => isValid(i, newSqs));
+            let opponentWinningMoves = newValidMoves.filter(i => (isWinningMove(i, "X", newSqs)))
+            if (opponentWinningMoves.length > 0) { return false }
+            return true
+        })
+        if (okMoves.length > 0) {
+            //console.log("avoid any opponent win next time, random choice with central tendency")
+            let rand = (Math.random() + Math.random()) * okMoves.length / 2
+            return (okMoves[Math.floor(rand)])
+        }
     }
-
     // if all else fails play at random
     if (validMoves.length > 0) {
         //console.log("random choice with central tendency")
