@@ -59,8 +59,10 @@ function Game() {
             setDone(true)
             return
         }
-        nextMove = choose(config, sqs);
+        nextMove = choose(config, sqs)
+        if (!nextMove) {console.log("no move chosen")}
         if (nextMove) {
+            if (!isValid(nextMove,sqs)) {console.log("invalid move ", nextMove )}
             sqs[nextMove] = "O";
             setSquares(sqs)
             if (isWinningMove(nextMove, "O", sqs)) {
@@ -80,10 +82,10 @@ function Game() {
     // jsx
     return (
         <div className="game">
-            <p>Connect 4<br />Play first against the computer</p>
+            <h1>Connect 4</h1><hr />
             <div className="game-info">
                 <button className="reset" onClick={() => reset()}> New Game </button><br /><br />
-                <h3>{done ? "Game Over" : "Computer is O"}</h3>
+                <h3>{done ? "Game Over" : "Computer Plays Second"}</h3>
             </div>
             <Board
                 config={config}
