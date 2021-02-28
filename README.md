@@ -1,4 +1,4 @@
-# Playground
+# React Playground - Connect4
 
 A mini app using React and JavaScript for playing Connect4 against the computer. 
 Some functionality has been added to enable the computer to look a few moves ahead but it shouldn't be too hard to beat if you try.
